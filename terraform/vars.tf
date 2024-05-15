@@ -45,12 +45,12 @@ variable "cc_cloud_region" {
 
 variable "cc_env_name" {
   type    = string
-  default = "flink_handson_terraform"
+  default = "flinkcc_terraform"
 }
 
 variable "cc_cluster_name" {
   type    = string
-  default = "cc_handson_cluster"
+  default = "flinkcc_cluster"
 }
 
 variable "cc_availability" {

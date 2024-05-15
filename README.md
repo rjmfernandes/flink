@@ -20,23 +20,13 @@ This is a fork of https://github.com/griga23/shoe-store
 
 
 # Intro
-Imagine you are running a shoe shop. You want to get an overview of shoe sales, understand your customers better, and you'd like to start a loyalty program, too. Luckily, you already use Confluent Cloud as a backbone for your data. This means you can leverage Confluent Flink SQL for some ad-hoc analyses, and determine which of your customers are currently eligible for a free pair of shoes!
-
-For a good preparation and first understanding, please read this [Guide to Flink SQL: An In-Depth Exploration](https://www.confluent.io/blog/getting-started-with-apache-flink-sql/) . 
-If you want a refresher of the Kafka basics, we highly recommend our [Kafka Fundamentals Workshop](https://www.confluent.io/resources/online-talk/fundamentals-workshop-apache-kafka-101/) .
-
-In this demo, we will build a Shoe Store Loyalty Engine. We will use Flink SQL in Confluent Cloud on AWS (Azure or GCP also possible). You can find an architecture diagram below.
-
-![image](terraform/img/Flink_Hands-on_Workshop_Complete.png)
-
-When demoing `Setup` section should be executed first since is what takes longer.
 
 ## Required Confluent Cloud Resources 
 
 This is the deployment of confluent cloud infrastructure resources to run the Flink SQL Hands-on Workshop.
 We will deploy with terraform:
  - Environment:
-     - Name: flink_hands-on+UUID
+     - Name: flinkcc_terraform+UUID
      - with enabled Schema Registry (essentails) in AWS region (eu-central-1)
  - Confluent Cloud Basic Cloud: cc_handson_cluster
     - in AWS in region (eu-central-1)
@@ -49,8 +39,7 @@ We will deploy with terraform:
     - sr-XXXX with Role EnvironmentAdmin
     - clients-XXXX with Role CloudClusterAdmin
     - connectors-XXXX
- 
-![image](terraform/img/terraform_deployment.png)
+
 
 ## Setup
 - User account on [Confluent Cloud](https://www.confluent.io/confluent-cloud/tryfree)
@@ -71,27 +60,18 @@ confluent_cloud_api_secret = "$CC_API_SECRET"
 use_prefix = "$prefix_value"
 EOF
 cd ./terraform
-terraform init
+terraform init -upgrade
 terraform plan
 terraform apply -auto-approve
 cc_hands_env=`terraform output -json | jq -r .cc_hands_env.value`
 cc_kafka_cluster=`terraform output -json | jq -r .cc_kafka_cluster.value`
+cc_flink_pool=`terraform output -json | jq -r .FlinkComputePool.value`
 cd ..
 confluent environment use $cc_hands_env
-CC_FLINK_COMP_POOL=`confluent flink compute-pool create my-compute-pool --cloud aws --region eu-central-1 --max-cfu 10`
-cc_flink_pool=`echo "$CC_FLINK_COMP_POOL"| grep 'ID'|sed s/'.*| '//g|sed s/' .*'//g`
 confluent flink compute-pool use $cc_flink_pool
 ```
 
 Please check whether the terraform execution went without errors.
-  
-Wait for compute pool to be provisioned. You can check the status running:
-
-```shell
-confluent flink compute-pool describe
-```
-
-Once is Provisioned you can continue.
 
 # Workshop Labs
 
@@ -101,12 +81,12 @@ Once is Provisioned you can continue.
 
 To continue with the UI:
  - Access Confluent Cloud WebUI: https://confluent.cloud/login
- - Access your Environment: `<user_prefix>flink_handson_terraform-XXXXXXXX`
+ - Access your Environment: `<user_prefix>flinkcc_terraform-XXXXXXXX`
 
 Else open a flink shell:
 
 ```shell
-confluent flink shell
+confluent flink shell --database $cc_kafka_cluster
 ```
 
 Execute:
@@ -115,23 +95,13 @@ Execute:
 SHOW CATALOGS;
 ```
 
-And use your catalog:
-
-```
-USE CATALOG <MY CONFLUENT ENVIRONMENT NAME>;
-```
-
 Also:
 
 ```
 SHOW DATABASES;
 ```
 
-And use your database listed:
-
-```
-USE <YOUR CLUSTER NAME>;
-```
+No need to execute the `USE CATALOG <CATALOG>` and `USE <DB>` cause we already initialized the shell passing the db (cluster) to use.
 
 ### Flink Tables
 
