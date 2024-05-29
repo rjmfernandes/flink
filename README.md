@@ -242,7 +242,7 @@ Create table with unique products and the job to populate:
 CREATE TABLE shoe_products_keyed(
   product_id STRING,
   brand STRING,
-  model STRING,
+  `model` STRING,
   sale_price INT,
   rating DOUBLE,
   PRIMARY KEY (product_id) NOT ENFORCED
@@ -284,7 +284,7 @@ CREATE TABLE shoe_order_customer_product(
   last_name STRING,
   email STRING,
   brand STRING,
-  model STRING,
+  `model` STRING,
   sale_price INT,
   rating DOUBLE
 )WITH (
@@ -299,7 +299,7 @@ INSERT INTO shoe_order_customer_product(
   last_name,
   email,
   brand,
-  model,
+  `model`,
   sale_price,
   rating)
 SELECT
@@ -308,7 +308,7 @@ SELECT
   sc.last_name,
   sc.email,
   sp.brand,
-  sp.model,
+  sp.`model`,
   sp.sale_price,
   sp.rating
 FROM 
